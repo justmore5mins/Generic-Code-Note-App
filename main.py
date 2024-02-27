@@ -24,6 +24,9 @@ class TextEditor():
         file_menu.add_separator()
         file_menu.add_command(label="Exit",command=self.win.quit)
 
+        comp_menu = tk.Menu(self.win)
+        comp_menu.add_cascade(label="Compile",menu=comp_menu)
+
     def NewFile(self):
         self.text.delete(1.0,tk.END)
     
