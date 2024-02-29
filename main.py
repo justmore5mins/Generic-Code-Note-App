@@ -9,8 +9,6 @@ class TextEditor():
         self.text = tk.Text(self.win,wrap=tk.WORD)
         self.text.pack(expand=tk.YES,fill=tk.BOTH)
 
-        self.text.tag_add()
-
         self.CreateMenu()
         self.win.mainloop()
 
@@ -19,16 +17,16 @@ class TextEditor():
         self.win.config(menu=menu)
 
         file_menu = tk.Menu(menu)
-        menu.add_cascade(label="File",menu=file_menu)
-        file_menu.add_command(label="New",command=self.NewFile)
-        file_menu.add_command(label="Open",command=self.OpenFile)
-        file_menu.add_command(label="Save",command=self.SaveFile)
+        menu.add_cascade(label="File", menu=file_menu)
+        file_menu.add_command(label="New", command=self.NewFile)
+        file_menu.add_command(label="Open", command=self.OpenFile)
+        file_menu.add_command(label="Save", command=self.SaveFile)
         file_menu.add_separator()
-        file_menu.add_command(label="Exit",command=self.win.quit)
+        file_menu.add_command(label="Exit", command=self.win.quit)
 
-        comp_menu = tk.Menu(self.win)
-        menu.add_cascade(label="Compile",menu=comp_menu)
-        comp_menu.add_command(label="Compile",command=self.CompileRun)
+        compile_run_menu = tk.Menu(menu)
+        menu.add_cascade(label="Compile & Run", menu=compile_run_menu)
+        compile_run_menu.add_command(label="Run", command=self.RunCode)
 
     def NewFile(self):
         self.text.delete(1.0,tk.END)
@@ -47,20 +45,27 @@ class TextEditor():
                 file_handler.write(self.text.get(1.0, tk.END))
             self.window.title(f"Python Text Editor - {file}")
     
-    def CompileRun(self):
-        index = self.text.index(tk.CURRENT)
-        self.text.mark_set(tk.CURRENT,f"{index} linestart")
-        LineText = self.text.get(tk.CURRENT,f"{index} lineend")
-        if "<code>" in LineText and "</code>" in LineText:
-            CodeStart = self.text.search("<code>",tk.CURRENT,backwards=True,regexp=True)
-            CodeEnd = self.text.search("</code>",tk.CURRENT,regexp=True)
-            if CodeStart and CodeEnd:
-                CodeText = self.text.get(f"{CodeStart} + 6 chars",f"{CodeEnd} - 1 chars")
-                print(f"Compiling and running:\n{CodeText}")
-            else:
-                print("invalid code block")
-        else:
-            print("Not in the code block")
+    def RunCode(self):
+        # 获取当前光标所在位置的行号
+        current_line = self.text.index(tk.CURRENT).split(".")[0]
+
+        # 获取当前行的文本内容
+        line_text = self.text.get(f"{current_line}.0", f"{current_line}.end").strip()
+
+        # 如果当前行包含 "<code>"，执行代码
+        if "code" in line_text:
+            code_start = self.text.search("<code>", tk.CURRENT, backwards=True)
+            code_end = self.text.search("</code>", tk.CURRENT)
+
+            if code_start and code_end:
+                code_start_line, code_start_col = code_start.split(".")
+                code_end_line, code_end_col = code_end.split(".")
+
+                code_block = self.text.get(f"{code_start_line}.{int(code_start_col)+7}", f"{code_end_line}.{code_end_col}")
+
+                # 在这里执行你的代码块
+                print("Executing code block:")
+                print(code_block)
 
 if __name__ == "__main__":
     editor = TextEditor()
