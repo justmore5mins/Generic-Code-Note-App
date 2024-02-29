@@ -9,6 +9,8 @@ class TextEditor():
         self.text = tk.Text(self.win,wrap=tk.WORD)
         self.text.pack(expand=tk.YES,fill=tk.BOTH)
 
+        self.text.tag_add()
+
         self.CreateMenu()
         self.win.mainloop()
 
@@ -26,7 +28,7 @@ class TextEditor():
 
         comp_menu = tk.Menu(self.win)
         menu.add_cascade(label="Compile",menu=comp_menu)
-        comp_menu.add_command(label="Compile")
+        comp_menu.add_command(label="Compile",command=self.CompileRun)
 
     def NewFile(self):
         self.text.delete(1.0,tk.END)
@@ -44,6 +46,21 @@ class TextEditor():
             with open(file=file, mode="w",encoding="utf-8") as file_handler:
                 file_handler.write(self.text.get(1.0, tk.END))
             self.window.title(f"Python Text Editor - {file}")
+    
+    def CompileRun(self):
+        index = self.text.index(tk.CURRENT)
+        self.text.mark_set(tk.CURRENT,f"{index} linestart")
+        LineText = self.text.get(tk.CURRENT,f"{index} lineend")
+        if "<code>" in LineText and "</code>" in LineText:
+            CodeStart = self.text.search("<code>",tk.CURRENT,backwards=True,regexp=True)
+            CodeEnd = self.text.search("</code>",tk.CURRENT,regexp=True)
+            if CodeStart and CodeEnd:
+                CodeText = self.text.get(f"{CodeStart} + 6 chars",f"{CodeEnd} - 1 chars")
+                print(f"Compiling and running:\n{CodeText}")
+            else:
+                print("invalid code block")
+        else:
+            print("Not in the code block")
 
 if __name__ == "__main__":
     editor = TextEditor()
